@@ -18,16 +18,39 @@ router.get('/getAll',isLoggedIn, async(req, res, next)=>{
         const loggedUser = await User.findByIdAndUpdate(id).populate('myLog');
         res.status(201).json(loggedUser.myLog);
     } catch (error) {
-        
+        next(createError(error));
     }
 })
 
 router.get('/:id', isLoggedIn, async(req, res, next)=>{
     try {
         const {id} = req.params;
-        
+        const oneLog = await Log.findById(id);
+        res.status(201).json(oneLog);
     } catch (error) {
-        
+        next(createError(error));
+    }
+})
+
+router.put('/:id', isLoggedIn, async(req, res, next)=>{
+    try {
+        const {id} = req.params;
+        const {title, body} = req.body;
+        const updatedLog = await Log.findByIdAndUpdate(id,{title,body});
+        const updateUser = await Log.findByIdAndUpdate(req.session.currentUser._id,{$push:{myLog: id}}).populate("myLog");
+        res.status(200).json({updateUser, updatedLog});
+    } catch (error) {
+        next(createError(error));
+    }
+})
+
+router.delete("/:id",isLoggedIn, async(req, res, next)=>{
+    try {
+        const {id} = req.params;
+        const deleteLog = await Log.findByIdAndDelete(id);
+        res.status(200).json(deleteLog);
+    } catch (error) {
+        next(createError(error));
     }
 })
 
